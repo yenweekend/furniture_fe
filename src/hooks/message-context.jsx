@@ -1,9 +1,11 @@
 import { message } from "antd";
+import { createContext } from "react";
 
-import { useContext, createContext } from "react";
 const MessageContext = createContext(null);
+
 export const MessageProvider = ({ children }) => {
   const [messageApi, contextHolder] = message.useMessage();
+
   return (
     <MessageContext.Provider value={messageApi}>
       {contextHolder}
@@ -11,6 +13,5 @@ export const MessageProvider = ({ children }) => {
     </MessageContext.Provider>
   );
 };
-const useMessage = () => useContext(MessageContext);
 
-export default useMessage;
+export { MessageContext };

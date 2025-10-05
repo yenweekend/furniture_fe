@@ -1,0 +1,40 @@
+import { configureStore } from "@reduxjs/toolkit";
+import {
+  persistStore,
+  persistReducer,
+  FLUSH,
+  REHYDRATE,
+  PAUSE,
+  PERSIST,
+  PURGE,
+  REGISTER,
+} from "redux-persist";
+import storage from "redux-persist/lib/storage";
+import autoMergeLevel2 from "redux-persist/lib/stateReconciler/autoMergeLevel2";
+const persistConfig = {
+  key: "root",
+  storage: storage,
+  stateReconciler: autoMergeLevel2, // Xem thêm tại mục "Quá trình merge".
+};
+const authPersistConfig = {
+  ...persistConfig,
+  key: "auth",
+  whitelist: ["isLoggedIn"],
+};
+import authReducer from "../slice/auth.slice";
+
+//TODO REdux
+
+const store = configureStore({
+  reducer: {
+    auth: persistReducer(authPersistConfig, authReducer),
+  },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
+    }),
+});
+export default store;
+export const persistor = persistStore(store);
