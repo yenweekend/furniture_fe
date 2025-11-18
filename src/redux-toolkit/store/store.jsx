@@ -22,12 +22,15 @@ const authPersistConfig = {
   whitelist: ["isLoggedIn"],
 };
 import authReducer from "../slice/auth.slice";
+import searchReducer from "../slice/search.slice";
 
 //TODO REdux
 
 const store = configureStore({
   reducer: {
     auth: persistReducer(authPersistConfig, authReducer),
+    earch: searchReducer,
+
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

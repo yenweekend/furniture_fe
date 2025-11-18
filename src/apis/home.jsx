@@ -5,4 +5,12 @@ export const getHome = async () => {
   return response;
 };
 
-//TODO SEARCH
+export const getSearch = async (key, page, sort) => {
+  const response = await apiAxios.get(`/api/search?q=${key}`, {
+    params: {
+      sort,
+      page,
+    },
+  });
+  return response;
+};

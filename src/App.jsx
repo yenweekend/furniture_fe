@@ -3,7 +3,7 @@ import { NotFound } from "./containers/components";
 
 import Master from "./containers/layouts/user/Master";
 
-import { Home } from "./containers/pages/ui";
+import { Home , ProductsSearched} from "./containers/pages/ui";
 import Login from "./containers/pages/ui/Account/Login";
 import Register from "./containers/pages/ui/Account/Register";
 
@@ -13,6 +13,8 @@ function App() {
       <Routes>
         <Route element={<Master />} path={""}>
           <Route element={<Home />} path={"/"}></Route>
+          <Route element={<ProductsSearched />} path={"/search"}></Route>
+
           <Route element={<Login />} path={"/account/login"}></Route>
           <Route element={<Register />} path={"/account/register"}></Route>
           <Route element={<NotFound />} path="/*"></Route>
