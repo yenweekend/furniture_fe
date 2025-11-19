@@ -1,4 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import icons from "@/utils/icons";
+
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
@@ -47,8 +49,6 @@ import {
 
 import { Button } from "@/components/ui/button";
 import useMessage from "@/hooks/useMessage";
-import { Controller } from "react-hook-form";
-import ImageUploader from "@/containers/components/ImageUploader";
 
 //TODO
 const ProductDetail = () => {
@@ -411,54 +411,6 @@ const ProductDetail = () => {
               </button>
             </div>
           </div>
-          {data.data.feedback.length > 0 && (
-            <div className="w-full bg-[#fff] py-5 px-3 mt-[15px]">
-              <div className="flex flex-col">
-                {data.data.feedback.map((fb) => (
-                  <div
-                    key={fb.id}
-                    className="border-b border-b-solid border-b-[rgba(0,0,0,0.09)] pb-[12px] pl-2 flex items-start gap-3"
-                  >
-                    <div className="thumb w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
-                      <UserRound stroke="#fff" />
-                    </div>
-                    <div className="flex flex-col">
-                      <span className="text-[12px] font-normal">
-                        nguyenvanyen
-                      </span>
-                      <Rate
-                        disabled
-                        defaultValue={2}
-                        starColor="#fff"
-                        className="ant-rate-custom-v1 ant-rate-custom "
-                      />
-                      <p className="text-[12px] text-[#0000008A] mb-3">
-                        <span>
-                          {moment(fb.createdAt)
-                            .locale("vi")
-                            .format("DD [tháng] MM, YYYY hh:mm A")}
-                        </span>
-                      </p>
-                      <p className="text-[14px] text-[#333] font-medium pb-3">
-                        {fb.comment}
-                      </p>
-                      <div className="flex items-center">
-                        {fb.ReviewImages.map((img) => (
-                          <div className="w-[60px] h-[60px]" key={img.id}>
-                            <img
-                              src={img.img_url}
-                              className="w-full h-full object-cover"
-                              alt="Ảnh feedback"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
         <div className="2md:basis-55 w-full">
           <div className=" bg-[#fff]   p-[15px]">
