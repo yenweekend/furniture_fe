@@ -29,7 +29,7 @@ import searchReducer from "../slice/search.slice";
 const store = configureStore({
   reducer: {
     auth: persistReducer(authPersistConfig, authReducer),
-    earch: searchReducer,
+    search: searchReducer,
 
   },
   middleware: (getDefaultMiddleware) =>

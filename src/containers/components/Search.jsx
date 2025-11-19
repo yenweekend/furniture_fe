@@ -7,7 +7,6 @@ import {
   TrendingUp,
   X,
 } from "lucide-react";
-import withShareInput from "@/hocs/withShareInput";
 import { useSelector, useDispatch } from "react-redux";
 import {
   setSearchInput,
