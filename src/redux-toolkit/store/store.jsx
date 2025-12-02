@@ -23,14 +23,14 @@ const authPersistConfig = {
 };
 import authReducer from "../slice/auth.slice";
 import searchReducer from "../slice/search.slice";
-
-//TODO REdux
-
+import couponReducer from "../slice/coupon.slice";
+import cartReducer from "../slice/cart.slice";
 const store = configureStore({
   reducer: {
-    auth: persistReducer(authPersistConfig, authReducer),
     search: searchReducer,
-
+    coupon: couponReducer,
+    cart: cartReducer,
+    auth: persistReducer(authPersistConfig, authReducer),
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

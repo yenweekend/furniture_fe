@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {  useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   CircleAlert,
@@ -21,7 +21,6 @@ import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import NotFound from "./NotFound";
-import useMessage from "@/hooks/useMessage";
 import vnUnaccent from "@/helpers/vnUnaccent";
 import {
   addToHistory,
@@ -32,12 +31,11 @@ const Search = ({ className }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [open, onOpenChange] = useState(false);
-  const messageApi = useMessage();
   const input = useSelector((state) => state.search.input);
   const historySearch = useSelector((state) => state.search.historySearch);
   const result = useSelector((state) => state.search.result);
   const dispatch = useDispatch();
-  const { mutate, isPending, isError, error, isSuccess } = useMutation({
+  const { mutate, isPending, isError } = useMutation({
     mutationFn: getSearch,
     onSuccess: (response) => {
       dispatch(setResult(response.data));
@@ -53,6 +51,7 @@ const Search = ({ className }) => {
     onOpenChange(false);
     document.activeElement.blur();
   }, [location]);
+
   if (isError) {
     dispatch(setResult(null));
   }
@@ -75,14 +74,13 @@ const Search = ({ className }) => {
       navigate(`/search?q=${encodeURIComponent(input)}`);
     }
   };
-  const handleSearch = useCallback(() => {
+  const handleSearch = () => {
     if (input.trim().length !== 0) {
       addToHistory(vnUnaccent(input));
       dispatch(setHistorySearch(getHistory()));
-
       navigate(`/search?q=${encodeURIComponent(input)}`);
     }
-  }, [input]);
+  };
   return (
     <form
       className={cn(

@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
-import { motion } from "motion/react";
 const HoverEffectButton = ({ className, children }) => {
   return (
     <motion.button

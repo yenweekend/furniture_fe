@@ -22,8 +22,6 @@ export const checkAuth = createAsyncThunk(
       });
       return response.data.account;
     } catch (error) {
-      console.log(error);
-
       return thunkAPI.rejectWithValue("Xác thực thất bại");
     }
   }

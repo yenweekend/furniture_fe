@@ -3,17 +3,15 @@ import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
 import { BrowserRouter as Router } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import GlobalStyle from "./Theme/GlobalStyled";
-
-import store, { persistor } from "./redux-toolkit/store/store";
-import { PersistGate } from "redux-persist/lib/integration/react";
 import { Provider } from "react-redux";
-
+import store from "./redux-toolkit/store/store";
+import GlobalStyle from "./Theme/GlobalStyled";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { PersistGate } from "redux-persist/lib/integration/react";
+import { persistor } from "./redux-toolkit/store/store";
 import { Toaster } from "sonner";
-import { MessageProvider } from "./hooks/message-context";
+import { MessageProvider } from "./hooks/useMessage";
 const queryClient = new QueryClient();
-
 const root = ReactDOM.createRoot(document.getElementById("root"));
 
 root.render(

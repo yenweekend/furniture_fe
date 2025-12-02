@@ -1,13 +1,15 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import icons from "@/utils/icons";
-
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import { HoverEffectBox, NotFound } from "../../components";
 import { useQuery } from "@tanstack/react-query";
-import { getProductDetail, getViewdProduct } from "../../../apis/product.api";
+import {
+  getProductDetail,
+  getViewdProduct,
+  giveFeedBack,
+} from "../../../apis/product.api";
 import FancyBoxWrapper from "@/helpers/fancybox";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -22,8 +24,19 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import {
+  Drawer,
+  DrawerClose,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import formatPrice from "@/helpers/formatPrice";
+import CartItem from "@/containers/components/Items/CartItem";
 import moment from "moment";
 import {
   Minus,
@@ -32,6 +45,7 @@ import {
   Facebook,
   Twitter,
   Link as LinkIcon,
+  ShoppingCart,
   Loader2,
   UserRound,
 } from "lucide-react";
@@ -39,6 +53,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Rate } from "antd";
 import slugify from "@/helpers/slugify";
 import _ from "lodash";
+import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { ProductCard } from "../../components";
 import { Card, CardContent } from "@/components/ui/card";
 import ProductDetailSkeleton from "@/containers/components/Skeleton/ProductDetail";
@@ -46,15 +61,40 @@ import {
   saveViewedProduct,
   getViewedProductSlugs,
 } from "@/helpers/localstorage";
-
+import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { useSelector } from "react-redux";
+import { add } from "@/apis/cart";
 import { Button } from "@/components/ui/button";
+import toast from "@/containers/components/Toaster";
+import { updateCheckoutItems } from "@/helpers/localstorage";
 import useMessage from "@/hooks/useMessage";
-
-//TODO
+import { Controller, useForm } from "react-hook-form";
+import ImageUploader from "@/containers/components/ImageUploader";
 const ProductDetail = () => {
+  const { account } = useSelector((state) => state.auth);
+
+  const {
+    setError,
+    clearErrors,
+    handleSubmit,
+    reset,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm({
+    defaultValues: {
+      feedback: "",
+      rate: "",
+      imageData: [],
+    },
+  });
   const messageApi = useMessage();
 
+  const navigate = useNavigate();
+  const cartData = useSelector((state) => state.cart.cart);
   const location = useLocation();
+  const isDesktop = useMediaQuery("(min-width: 990px)");
+  const [open, setOpen] = useState(false);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const swipeRef = useRef(null);
@@ -90,6 +130,93 @@ const ProductDetail = () => {
       return { ...prev, [attributeName]: e.target.value };
     });
   }, []);
+  const queryClient = useQueryClient();
+  const { mutate, ...mutateAddToCart } = useMutation({
+    mutationFn: add,
+    onSuccess: (response) => {
+      console.log(response);
+
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      toast({
+        title: "Thêm vào giỏ hàng thành cônng",
+        type: "success",
+        data: {
+          thumbnail: data.data.productDetail.thumbnail,
+          price: data.data.productDetail.price,
+          title: data.data.productDetail.title,
+        },
+      });
+    },
+    onError: (error) => {
+      messageApi.open({
+        type: "error",
+        content:
+          error.response.data.msg || "Thêm sản phẩm vào giỏ hàng thất bại!",
+        className: "custom-class",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      });
+    },
+  });
+  const mutatePurchaseNowMethods = useMutation({
+    mutationFn: add,
+    onSuccess: (response) => {
+      console.log(response);
+
+      updateCheckoutItems([data.data.productDetail.id]);
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+      navigate("/");
+    },
+    onError: (error) => {
+      messageApi.open({
+        type: "error",
+        content:
+          error.response.data.msg ||
+          "Không thể mua sản phẩm, vui lòng thử lại!",
+        className: "custom-class",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      });
+    },
+  });
+  const mutateFeedBack = useMutation({
+    mutationFn: giveFeedBack,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["product-detail"] });
+      setValue("imageData", []);
+      reset();
+      messageApi.open({
+        type: "success",
+        content: "Thêm đánh giá thành công",
+        className: "custom-class",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      });
+    },
+    onError: (error) => {
+      console.log(error);
+
+      messageApi.open({
+        type: "error",
+        content: error.response.data.msg || "Không thể gửi đánh giá",
+        className: "custom-class",
+        style: {
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        },
+      });
+    },
+  });
 
   const handleIncrease = () => {
     setQuantity((prev) => {
@@ -98,6 +225,7 @@ const ProductDetail = () => {
         alert("Số lượng sản phẩm trong kho không đủ!");
         return prev;
       }
+      // debouncedUpdateQuantity(newQuantity);
       return newQuantity;
     });
   };
@@ -109,11 +237,12 @@ const ProductDetail = () => {
         return prev;
       }
       const newQuantity = prev - 1;
+      // debouncedUpdateQuantity(newQuantity);
       return newQuantity;
     });
   };
 
-  const { isPending, isError, error, data } = useQuery({
+  const { isPending, isError, data } = useQuery({
     queryKey: ["product-detail", slug],
     queryFn: () => getProductDetail(slug),
     enabled: !!slug,
@@ -121,7 +250,6 @@ const ProductDetail = () => {
   const {
     isPending: isViewedPending,
     isError: isViewedError,
-    error: viewedError,
     data: viewedData,
   } = useQuery({
     queryKey: ["product-viewd", slugs],
@@ -225,7 +353,26 @@ const ProductDetail = () => {
       },
     });
   }
-
+  const handleAddToCart = (data) => {
+    if (!account) {
+      alert("Hãy đăng nhập để trải nghiệm tính năng này");
+    } else {
+      mutate(data);
+    }
+  };
+  const onSubmit = (fData) => {
+    const formData = new FormData();
+    formData.append("rating", fData.rate);
+    formData.append("feedback", fData.feedback);
+    formData.append("productId", data.data.productDetail.id);
+    fData.imageData.forEach((file) => {
+      formData.append("images", file.originFileObj); // `originFileObj` contains the actual file
+    });
+    formData.forEach((value, key) => {
+      console.log(key, value);
+    });
+    mutateFeedBack.mutate(formData);
+  };
   return (
     <div className="mt-[30px] mb-[55px] pb-[30px]">
       <FancyBoxWrapper
@@ -411,6 +558,54 @@ const ProductDetail = () => {
               </button>
             </div>
           </div>
+          {data.data.feedback.length > 0 && (
+            <div className="w-full bg-[#fff] py-5 px-3 mt-[15px]">
+              <div className="flex flex-col">
+                {data.data.feedback.map((fb) => (
+                  <div
+                    key={fb.id}
+                    className="border-b border-b-solid border-b-[rgba(0,0,0,0.09)] pb-[12px] pl-2 flex items-start gap-3"
+                  >
+                    <div className="thumb w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center flex-shrink-0">
+                      <UserRound stroke="#fff" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[12px] font-normal">
+                        nguyenvanyen
+                      </span>
+                      <Rate
+                        disabled
+                        defaultValue={2}
+                        starColor="#fff"
+                        className="ant-rate-custom-v1 ant-rate-custom "
+                      />
+                      <p className="text-[12px] text-[#0000008A] mb-3">
+                        <span>
+                          {moment(fb.createdAt)
+                            .locale("vi")
+                            .format("DD [tháng] MM, YYYY hh:mm A")}
+                        </span>
+                      </p>
+                      <p className="text-[14px] text-[#333] font-medium pb-3">
+                        {fb.comment}
+                      </p>
+                      <div className="flex items-center">
+                        {fb.ReviewImages.map((img) => (
+                          <div className="w-[60px] h-[60px]" key={img.id}>
+                            <img
+                              src={img.img_url}
+                              className="w-full h-full object-cover"
+                              alt="Ảnh feedback"
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
         <div className="2md:basis-55 w-full">
           <div className=" bg-[#fff]   p-[15px]">
@@ -564,22 +759,56 @@ const ProductDetail = () => {
             </div>
 
             <div className="flex items-center justify-center mt-[15px] gap-[30px]">
-              <div className="basis-1/2 2md:block hidden">
-                <Button disabled className={"rounded flex-auto w-full"}>
-                  <Loader2 className="animate-spin" />
-                  <span className="text-inheirt text-[14px] font-bold uppercase">
-                    Thêm vào giỏ
-                  </span>
-                </Button>
-              </div>
+              {mutateAddToCart.isPending ? (
+                <div className="basis-1/2 2md:block hidden">
+                  <Button disabled className={"rounded flex-auto w-full"}>
+                    <Loader2 className="animate-spin" />
+                    <span className="text-inheirt text-[14px] font-bold uppercase">
+                      Thêm vào giỏ
+                    </span>
+                  </Button>
+                </div>
+              ) : (
+                <div
+                  className="basis-1/2 2md:block hidden"
+                  onClick={() =>
+                    handleAddToCart({
+                      id: data.data.productDetail.id,
+                      payload: quantity,
+                    })
+                  }
+                >
+                  <HoverEffectBox className={"w-full rounded"}>
+                    <span className="text-inheirt text-[14px] font-bold uppercase">
+                      Thêm vào giỏ
+                    </span>
+                  </HoverEffectBox>
+                </div>
+              )}
 
               <div className="basis-1/2 ">
-                <Button disabled className={"rounded flex-auto w-full"}>
-                  <Loader2 className="animate-spin" />
-                  <span className="text-inheirt text-[14px] font-bold uppercase">
+                {mutatePurchaseNowMethods.isPending ? (
+                  <Button disabled className={"rounded flex-auto w-full"}>
+                    <Loader2 className="animate-spin" />
+                    <span className="text-inheirt text-[14px] font-bold uppercase">
+                      Mua ngay
+                    </span>
+                  </Button>
+                ) : (
+                  <motion.button
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="text-[14px] text-[#fff] font-bold bg-redni w-full px-[25px] py-[10px] rounded uppercase"
+                    onClick={() => {
+                      mutatePurchaseNowMethods.mutate({
+                        id: data.data.productDetail.id,
+                        payload: quantity,
+                      });
+                    }}
+                  >
                     Mua ngay
-                  </span>
-                </Button>
+                  </motion.button>
+                )}
               </div>
             </div>
             <div className="warranty flex md:items-center gap-3 mt-[15px] md:flex-row flex-col">
@@ -617,6 +846,13 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
+          {/* <div className="bg-[#fff] mt-[15px] p-[15px]">
+            <div className="grid max-768:auto-cols-[85%]  md:auto-cols-[60%] max-1280:grid-flow-col max-1280:gap-4 max-1280:overflow-x-auto max-1280:no-scrollbar xl:grid-cols-2 xl:gap-[15px]">
+              <CouponCard />
+              <CouponCard />
+              <CouponCard />
+            </div>
+          </div> */}
           <div className="bg-[#fff] mt-[15px] p-[15px]">
             <Tabs defaultValue="description" className="w-full">
               <TabsList className="bg-none w-full flex justify-start border-b-[2px] border-[#ededed]">
@@ -692,7 +928,108 @@ const ProductDetail = () => {
                 <p className="text-[14px] font-medium mb-[15px]">
                   Chưa có đánh giá cho sản phẩm này
                 </p>
-                {/* TODO feedback */}
+                <form className="judge-form p-5 border border-solid border-[#ededed] rounded-sm">
+                  <h2 className="text-[20px] font-bold">Thêm đánh giá</h2>
+                  <div className="flex items-start justify-between">
+                    <div className="basis-1/3">
+                      <p className="text-[14px] text-[#333]  mt-[15px] font-medium">
+                        Đánh giá chung
+                      </p>
+                      <Controller
+                        name="rate"
+                        control={control}
+                        rules={{
+                          required: "Vui lòng đánh giá trước khi gửi feedback",
+                        }}
+                        render={({ field }) => (
+                          <Rate {...field} className="ant-rate-custom " />
+                        )}
+                      />
+                      {errors?.rate && (
+                        <p className="text-redichi text-[13px] mt-[4px]">
+                          {errors.rate.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="basis-2/3 flex justify-end flex-auto">
+                      <Controller
+                        name="imageData"
+                        control={control}
+                        render={({ field, fieldState }) => (
+                          <>
+                            <ImageUploader
+                              onChange={field.onChange}
+                              setError={setError}
+                              clearErrors={clearErrors}
+                            />
+                            {fieldState.error && (
+                              <p style={{ color: "red" }}>
+                                {fieldState.error.message}
+                              </p>
+                            )}
+                          </>
+                        )}
+                      />
+                      {errors?.imageData && (
+                        <p className="text-redichi text-[13px] mt-[4px]">
+                          {errors.imageData.message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="mt-[15px]">
+                    <label
+                      htmlFor="judge"
+                      className="text-blackni  text-[14px] font-bold"
+                    >
+                      Chi tiết đánh giá
+                    </label>
+                    <Controller
+                      name="feedback"
+                      control={control}
+                      rules={{
+                        required: "Vui lòng điền đánh giá chi tiết",
+                      }}
+                      render={({ field }) => (
+                        <Textarea
+                          placeholder="Type your message here."
+                          id="judge"
+                          {...field}
+                        />
+                      )}
+                    />
+                    {errors?.feedback && (
+                      <p className="text-redichi text-[13px] mt-[4px]">
+                        {errors.feedback.message}
+                      </p>
+                    )}
+                  </div>
+                  {mutateFeedBack.isPending ? (
+                    <Button disabled className={"rounded mt-[15px]"}>
+                      <Loader2 className="animate-spin" />
+                      <span className="text-inheirt text-[14px] font-bold uppercase">
+                        Đang xử lí
+                      </span>
+                    </Button>
+                  ) : (
+                    <Button
+                      className={"mt-[15px]"}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (!account) {
+                          alert(
+                            "Hãy đăng nhập để gửi feedback cho sản phẩm này"
+                          );
+                        } else {
+                          handleSubmit(onSubmit)();
+                        }
+                      }}
+                    >
+                      Gửi ngay
+                    </Button>
+                  )}
+                </form>
               </TabsContent>
             </Tabs>
           </div>
@@ -811,18 +1148,111 @@ const ProductDetail = () => {
               </div>
             </div>
           </div>
-          <div className="cursor-pointer text-[#fff] py-2 pl-4 flex-auto w-full">
-            <div
-              className="block p-[10px] flex-auto bg-redni text-[#fff] text-[13px] font-medium cursor-pointe text-center uppercase rounded cursor-pointer"
-              onClick={() =>
-                alert("Hãy đăng nhập để trải nghiệm tính năng này")
-              }
-            >
-              <span>Thêm vào giỏ </span>
+          {!isDesktop && cartData ? (
+            <Drawer open={open} onOpenChange={setOpen} modal={true}>
+              <DrawerTrigger className="cursor-pointer text-[#fff] py-2 pl-4 flex-auto w-full">
+                <div
+                  className="block p-[10px] flex-auto bg-redni text-[#fff] text-[13px] font-medium cursor-pointe text-center uppercase rounded cursor-pointer"
+                  onClick={() =>
+                    handleAddToCart({
+                      id: data.data.productDetail.id,
+                      payload: quantity,
+                    })
+                  }
+                >
+                  <span>Thêm vào giỏ </span>
+                </div>
+              </DrawerTrigger>
+              <DrawerContent>
+                <DrawerHeader className="text-left rounded-t-[10px] bg-redni ">
+                  <DrawerTitle>
+                    <div className="text-[15px]  font-medium text-[#fff] flex items-center justify-between">
+                      <span className=" basis-1/3 text-[14px] font-normal">
+                        {cartData?.length} sản phẩm
+                      </span>
+                      <span className=" basis-1/3  text-center font-bold ">
+                        {formatPrice(
+                          cartData?.reduce((initial, result) => {
+                            return initial + parseInt(result.price);
+                          }, 0)
+                        )}
+                      </span>
+                      <div className="basis-1/3 flex justify-end">
+                        <DrawerClose className="text-[#fff]">
+                          <X stroke="#fff" size={20} />
+                        </DrawerClose>
+                      </div>
+                    </div>
+                  </DrawerTitle>
+                  <DrawerDescription className={"hidden"}>
+                    Thông tin giỏ hàng
+                  </DrawerDescription>
+                </DrawerHeader>
+                <div className="py-[15px] ">
+                  {cartData?.length > 0 ? (
+                    <div className="max-h-[360px] overflow-y-scroll cart-view-scroll">
+                      <ul className=" ">
+                        {cartData?.map((product) => (
+                          <CartItem product={product} key={product.id} />
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center flex-col gap-3 py-4  border-b border-solid border-shop">
+                      <ShoppingCart
+                        size={30}
+                        strokeWidth={1.4}
+                        className="text-redichi"
+                      />
+                      <span className="text-[13px] text-vendor">
+                        Chưa có sản phẩm nào trong giỏ hàng{" "}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="  mb-[20px] flex justify-between items-center py-[10px] leading-6 px-[12px]">
+                    <span className="text-blackni uppercase text-[14px]">
+                      Tổng tiền :
+                    </span>
+                    <span className="text-redni font-bold text-[16px] ">
+                      {formatPrice(
+                        cartData?.reduce((initial, result) => {
+                          return (
+                            initial +
+                            parseInt(result.price) * parseInt(result.quantity)
+                          );
+                        }, 0)
+                      )}
+                    </span>
+                  </div>
+                </div>
+                <DrawerFooter className="pt-2">
+                  <DrawerClose
+                    asChild
+                    className="block p-[10px] mt-[5px] w-full bg-redni text-[#fff] text-[13px] font-medium cursor-pointe text-center uppercase"
+                  >
+                    <Link to={"/cart"}>Xem giỏ hàng</Link>
+                  </DrawerClose>
+                </DrawerFooter>
+              </DrawerContent>
+            </Drawer>
+          ) : (
+            <div className="cursor-pointer text-[#fff] py-2 pl-4 flex-auto w-full">
+              <div
+                className="block p-[10px] flex-auto bg-redni text-[#fff] text-[13px] font-medium cursor-pointe text-center uppercase rounded cursor-pointer"
+                onClick={() =>
+                  alert("Hãy đăng nhập để trải nghiệm tính năng này")
+                }
+              >
+                <span>Thêm vào giỏ </span>
+              </div>
             </div>
-          </div>
+          )}
         </div>
       </div>
+      {mutateFeedBack.isPending && (
+        <div className="fixed  inset-0 z-[999] bg-transparent"></div>
+      )}
     </div>
   );
 };

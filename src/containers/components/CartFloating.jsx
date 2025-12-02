@@ -14,6 +14,7 @@ import {
   DrawerTitle,
   DrawerTrigger,
 } from "@/components/ui/drawer";
+import CartItem from "./Items/CartItem";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 const CartFloating = () => {
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -75,9 +76,9 @@ const CartFloating = () => {
             <div className="py-[15px] px-4">
               <div className="max-h-[360px] overflow-y-scroll cart-view-scroll">
                 <ul className=" ">
-                  {/* {cartData?.map((product) => (
+                  {cartData?.map((product) => (
                     <CartItem product={product} key={product.id} />
-                  ))} */}
+                  ))}
                 </ul>
               </div>
               <div className="  mb-[20px] flex justify-between items-center py-[10px] leading-6 px-3">
