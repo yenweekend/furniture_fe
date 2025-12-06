@@ -17,7 +17,7 @@ const showSessionExpiredModal = () => {
 
 // Tạo instance của Axios
 const api = axios.create({
-  baseURL: "http://localhost:3001", // Thay bằng URL API của bạn
+  baseURL: apiUrl, // Thay bằng URL API của bạn
   withCredentials: true, // Quan trọng! Để gửi cookie khi request
 });
 
@@ -40,6 +40,8 @@ api.interceptors.response.use(
         );
         return api(originalRequest);
       } catch (refreshError) {
+        console.log(refreshError);
+
         console.error("Không thể lấy lại access token, cần đăng nhập lại.");
         showSessionExpiredModal();
 

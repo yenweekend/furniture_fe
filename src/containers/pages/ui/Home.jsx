@@ -1,15 +1,8 @@
-import React, { useMemo, useState } from "react";
-
-import {
-  HoverEffectButton,
-  CouponCard,
-  ProductCardNi,
-  ProductCard,
-  BlogCard,
-  CollectionCard,
-  NotFound,
-  CartFloating,
-} from "@/containers/components/index";
+import React, {
+  useMemo,
+  useState,
+} from "react";
+import { HoverEffectButton, CouponCard } from "../../components";
 import { useMediaQuery } from "@/hooks/useMediaQuery";
 
 import {
@@ -21,14 +14,20 @@ import {
 } from "@/components/ui/carousel";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
-import { CircleChevronRight } from "lucide-react";
+import { X, Minus, Plus, CircleChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
+import {
+  ProductCardNi,
+  ProductCard,
+  BlogCard,
+  CollectionCard,
+} from "../../components";
 import { Carousel as CarouselAntd } from "antd";
 import HomeSkeleton from "@/containers/components/Skeleton/Home";
 import { useQuery } from "@tanstack/react-query";
 import { getHome } from "@/apis/home";
-
+import { NotFound, CartFloating } from "../../components";
 const Home = () => {
   const [sofaNewArrival, setSofaNewArrival] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
@@ -58,15 +57,12 @@ const Home = () => {
   if (isError) {
     return <NotFound />;
   }
-
-  console.log(data);
-
   return (
     <>
       <div>
         <div>
           <section className="banner ">
-            <div className=" 2md:px-2 shrink-0 w-full overflow-hidden">
+            <div className=" 2md:px-2 flex-shrink-0 w-full overflow-hidden">
               <CarouselAntd
                 arrows
                 infinite={false}
@@ -161,7 +157,7 @@ const Home = () => {
             </div>
           </section>
           <div className="flex  items-stretch overflow-y-auto no-scrollbar  mt-[15px] max-768:pl-[15px] ">
-            <div className=" 2md:basis-1/4 w-[60%] shrink-0 2md:px-[15px] pr-[15px]  md:w-[40%]">
+            <div className=" 2md:basis-1/4 w-[60%] flex-shrink-0 2md:px-[15px] pr-[15px]  md:w-[40%]">
               <CollectionCard
                 collectionData={{
                   thumbnail:
@@ -171,7 +167,7 @@ const Home = () => {
                 }}
               />
             </div>
-            <div className=" 2md:basis-1/4 w-[60%] shrink-0 2md:px-[15px] pr-[15px]  md:w-[40%]">
+            <div className=" 2md:basis-1/4 w-[60%] flex-shrink-0 2md:px-[15px] pr-[15px]  md:w-[40%]">
               {" "}
               <CollectionCard
                 collectionData={{
@@ -182,7 +178,7 @@ const Home = () => {
                 }}
               />
             </div>
-            <div className=" 2md:basis-1/4 w-[60%] shrink-0 2md:px-[15px] pr-[15px]  md:w-[40%]">
+            <div className=" 2md:basis-1/4 w-[60%] flex-shrink-0 2md:px-[15px] pr-[15px]  md:w-[40%]">
               {" "}
               <CollectionCard
                 collectionData={{
@@ -193,7 +189,7 @@ const Home = () => {
                 }}
               />
             </div>
-            <div className=" 2md:basis-1/4 w-[60%] shrink-0 2md:px-[15px] pr-[15px]  md:w-[40%]">
+            <div className=" 2md:basis-1/4 w-[60%] flex-shrink-0 2md:px-[15px] pr-[15px]  md:w-[40%]">
               {" "}
               <CollectionCard
                 collectionData={{
@@ -255,16 +251,18 @@ const Home = () => {
             </HoverEffectButton>
           </div>
         </section>
+
         <div className=" home-collection flex items-stretch overflow-x-auto no-scrollbar md:ml-[-12px] ">
           {data.data.data?.coupons.map((item) => (
             <div
-              className="shrink-0 md:px-[6px] px-3 md:basis-1/2  lg:basis-1/3 xl:basis-1/4 basis-[86%] "
+              className="flex-shrink-0 md:px-[6px] px-3 md:basis-1/2  lg:basis-1/3 xl:basis-1/4 basis-[86%] "
               key={item.id}
             >
               <CouponCard data={item} />
             </div>
           ))}
         </div>
+
         <div className=" home-collection md:p-[15px] relative md:px-0">
           <div className="pr-[100px] flex items-center gap-3">
             <h2 className="collection-title capitalize max-768:pl-[15px]">
@@ -326,9 +324,9 @@ const Home = () => {
               </Link>
             </div>
             <div className="2md:basis-10/12 md:basis-2/3 basis-1/2 px-[6px]">
-              <div className=" flex flex-row  md:px-[15px]  flex-nowrap overflow-x-auto shrink-0 no-scrollbar">
-                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 shrink-0">
-                  <div className="relative h-full text-center py-[15px] flex flex-col items-center shrink-0 ">
+              <div className=" flex flex-row  md:px-[15px]  flex-nowrap overflow-x-auto flex-shrink-0 no-scrollbar">
+                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 flex-shrink-0">
+                  <div className="relative h-full text-center py-[15px] flex flex-col items-center flex-shrink-0 ">
                     <div className="relative w-full pb-[100%]">
                       <div className="absolute inset-0">
                         <Link
@@ -348,8 +346,8 @@ const Home = () => {
                     </span>
                   </div>
                 </div>
-                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 shrink-0">
-                  <div className="relative h-full text-center py-[15px] flex flex-col items-center shrink-0 ">
+                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 flex-shrink-0">
+                  <div className="relative h-full text-center py-[15px] flex flex-col items-center flex-shrink-0 ">
                     <div className="relative w-full pb-[100%]">
                       <div className="absolute inset-0">
                         <Link
@@ -369,8 +367,8 @@ const Home = () => {
                     </span>
                   </div>
                 </div>
-                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 shrink-0">
-                  <div className="relative h-full text-center py-[15px] flex flex-col items-center shrink-0 ">
+                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 flex-shrink-0">
+                  <div className="relative h-full text-center py-[15px] flex flex-col items-center flex-shrink-0 ">
                     <div className="relative w-full pb-[100%]">
                       <div className="absolute inset-0">
                         <Link
@@ -390,8 +388,8 @@ const Home = () => {
                     </span>
                   </div>
                 </div>
-                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 shrink-0">
-                  <div className="relative h-full text-center py-[15px] flex flex-col items-center shrink-0 ">
+                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 flex-shrink-0">
+                  <div className="relative h-full text-center py-[15px] flex flex-col items-center flex-shrink-0 ">
                     <div className="relative w-full pb-[100%]">
                       <div className="absolute inset-0">
                         <Link
@@ -411,8 +409,8 @@ const Home = () => {
                     </span>
                   </div>
                 </div>
-                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 shrink-0">
-                  <div className="relative h-full text-center py-[15px] flex flex-col items-center shrink-0 ">
+                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 flex-shrink-0">
+                  <div className="relative h-full text-center py-[15px] flex flex-col items-center flex-shrink-0 ">
                     <div className="relative w-full pb-[100%]">
                       <div className="absolute inset-0">
                         <Link
@@ -432,8 +430,8 @@ const Home = () => {
                     </span>
                   </div>
                 </div>
-                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 shrink-0">
-                  <div className="relative h-full text-center py-[15px] flex flex-col items-center shrink-0 ">
+                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 flex-shrink-0">
+                  <div className="relative h-full text-center py-[15px] flex flex-col items-center flex-shrink-0 ">
                     <div className="relative w-full pb-[100%]">
                       <div className="absolute inset-0">
                         <Link
@@ -453,8 +451,8 @@ const Home = () => {
                     </span>
                   </div>
                 </div>
-                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 shrink-0">
-                  <div className="relative h-full text-center py-[15px] flex flex-col items-center shrink-0 ">
+                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 flex-shrink-0">
+                  <div className="relative h-full text-center py-[15px] flex flex-col items-center flex-shrink-0 ">
                     <div className="relative w-full pb-[100%]">
                       <div className="absolute inset-0">
                         <Link
@@ -474,8 +472,8 @@ const Home = () => {
                     </span>
                   </div>
                 </div>
-                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 shrink-0">
-                  <div className="relative h-full text-center py-[15px] flex flex-col items-center shrink-0 ">
+                <div className="2md:basis-1/8 md:basis-1/3 basis-1/2 px-1 flex-shrink-0">
+                  <div className="relative h-full text-center py-[15px] flex flex-col items-center flex-shrink-0 ">
                     <div className="relative w-full pb-[100%]">
                       <div className="absolute inset-0">
                         <Link
@@ -538,7 +536,7 @@ const Home = () => {
             <div className="2md:basis-4/5 xl:grid-cols-5 2md:pl-[14px] grid  grid-rows-2 gap-y-[12px] md:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-5 md:flex-auto w-full grid-cols-2">
               {newArrivalProducts.map((product) => (
                 <div
-                  className=" shrink-0 flex-grow-0 md:px-[6px] px-[2px]"
+                  className=" flex-shrink-0 flex-grow-0 md:px-[6px] px-[2px]"
                   key={product.slug}
                 >
                   <ProductCard productData={product} />
@@ -636,7 +634,7 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            <div className=" 2md:basis-3/10 shrink-0 bg-categoryni flex-col flex items-center justify-center max-990:px-[15px]">
+            <div className=" 2md:basis-3/10 flex-shrink-0 bg-categoryni flex-col flex items-center justify-center max-990:px-[15px]">
               <Link
                 to="/categories/nen-thom"
                 className="w-full block banner-hover-effect overflow-hidden "
@@ -662,7 +660,7 @@ const Home = () => {
               className="w-full group max-990:px-[15px]"
             >
               <CarouselContent className={""}>
-                {data.data.data?.blogs?.map((blog) => (
+                {data.data.data?.blogs.map((blog) => (
                   <CarouselItem
                     key={blog.slug}
                     className="lg:basis-1/5  2md:basis-1/4 basis-[80%] md:basis-1/3"
@@ -688,8 +686,7 @@ const Home = () => {
             </Carousel>
           </div>
         </section>
-        {/* <CartFloating /> */}
-        //TODO
+        <CartFloating />
       </div>
     </>
   );

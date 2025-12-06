@@ -20,11 +20,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 
 import { CartButtonTransition } from "../../components/ButtonTransition/CartButton";
+import { AccountButton } from "../../components/ButtonTransition/AccountButton";
 import { SearchButton } from "../../components/ButtonTransition/SearchButton";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import "react-lazy-load-image-component/src/effects/blur.css";
-
-//TODO SEARCH
 
 const Header = () => {
   const [openHamburger, setOpenHamburger] = React.useState(false);
@@ -223,7 +222,7 @@ const Header = () => {
               </div>
             </div>
             <div className="flex items-stretch ml-auto ">
-              <div className={"top-[72px] h-[82vh]"} />
+              <AccountButton className={"top-[72px] h-[82vh]"} />
               <Separator
                 orientation="vertical"
                 className={"my-auto hidden 2md:block h-[25px] bg-[#ffffff33]"}
@@ -462,7 +461,7 @@ const Header = () => {
                 orientation="vertical"
                 className={"my-auto hidden 2md:block h-[25px] bg-[#ffffff33]"}
               />
-              {/* <AccountButton className={"h-[82vh] top-[calc(100%-6px)]"} /> */}
+              <AccountButton className={"h-[82vh] top-[calc(100%-6px)]"} />
               <Separator
                 orientation="vertical"
                 className={"my-auto hidden 2md:block h-[25px] bg-[#ffffff33]"}

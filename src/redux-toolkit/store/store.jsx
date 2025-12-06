@@ -22,11 +22,14 @@ const authPersistConfig = {
   whitelist: ["isLoggedIn"],
 };
 import authReducer from "../slice/auth.slice";
-
-//TODO REdux
-
+import searchReducer from "../slice/search.slice";
+import couponReducer from "../slice/coupon.slice";
+import cartReducer from "../slice/cart.slice";
 const store = configureStore({
   reducer: {
+    search: searchReducer,
+    coupon: couponReducer,
+    cart: cartReducer,
     auth: persistReducer(authPersistConfig, authReducer),
   },
   middleware: (getDefaultMiddleware) =>
